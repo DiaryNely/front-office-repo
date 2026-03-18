@@ -1,0 +1,17 @@
+# Build artifacts
+**/target/
+**/dist/
+
+# Node artifacts
+**/node_modules/
+
+# IDE / OS
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+.env.local
