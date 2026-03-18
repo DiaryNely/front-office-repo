@@ -20,6 +20,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class BackOfficeReservationApiService {
 
+    private static final String BACK_OFFICE_BASE_URL = "http://localhost:8080/back-office";
+    private static final String BACK_OFFICE_API_TOKEN = resolveBackOfficeToken();
+
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
@@ -38,8 +41,7 @@ public class BackOfficeReservationApiService {
     }
 
     public String fetchReservationsRaw(String dateDebut, String dateFin) {
-        String baseUrl = getBackOfficeBaseUrl();
-        String endpoint = buildEndpoint(baseUrl, dateDebut, dateFin);
+        String endpoint = buildEndpoint(BACK_OFFICE_BASE_URL, dateDebut, dateFin);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(endpoint))
@@ -105,6 +107,10 @@ public class BackOfficeReservationApiService {
 
         boolean hasQuery = false;
 
+        endpoint.append(hasQuery ? '&' : '?');
+        endpoint.append("token=").append(URLEncoder.encode(BACK_OFFICE_API_TOKEN, StandardCharsets.UTF_8));
+        hasQuery = true;
+
         if (dateDebut != null && !dateDebut.isBlank()) {
             endpoint.append(hasQuery ? '&' : '?');
             endpoint.append("dateDebut=").append(URLEncoder.encode(dateDebut, StandardCharsets.UTF_8));
@@ -119,7 +125,17 @@ public class BackOfficeReservationApiService {
         return endpoint.toString();
     }
 
-    private String getBackOfficeBaseUrl() {
-        return "http://localhost:8080/back-office";
+    private static String resolveBackOfficeToken() {
+        String tokenFromEnv = System.getenv("FRONT_BACKOFFICE_API_TOKEN");
+        if (tokenFromEnv != null && !tokenFromEnv.isBlank()) {
+            return tokenFromEnv.trim();
+        }
+
+        String tokenFromProperty = System.getProperty("front.backoffice.api.token");
+        if (tokenFromProperty != null && !tokenFromProperty.isBlank()) {
+            return tokenFromProperty.trim();
+        }
+
+        return "LaDW0HpH2cmdKy";
     }
 }
